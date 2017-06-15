@@ -1,0 +1,42 @@
+filebeat.prospectors:
+  -
+    paths:
+          - /var/log/nginx/${EXPERIMENT_LOG_NAME:experiment.log}
+
+    pipeline: experiment_log 
+    #uncomment after 5.3. release
+
+    document_type: ${EXPERIMENT_DOC_TYPE:experiments}
+  -
+    paths:
+          - /var/log/nginx/${WEBSTAT_LOG_NAME:webstats.log}
+
+    pipeline: experiment_log 
+    #uncomment after 5.3. release
+
+    document_type: ${WEBSTAT_DOC_TYPE:webstats}
+
+output.elasticsearch:
+    hosts: ["http://${ELASTIC_HOST:127.0.0.1}:${ELASTIC_PORT:9200}"]
+
+    index: "stats-%{+yyyy.MM.dd}"
+    template.enabled: true
+    template.name: "stats"
+    template.path: "${path.config}/filebeat.template.json"
+    template.overwrite: false
+    template.versions.2x.enabled: false
+    indices:
+
+#    pipelines:
+#    - pipeline: experiment_log
+#      when.equals:
+#        type: "experiments"
+#    - pipeline: experiment_log
+#      when.equals:
+#        type: "webstats"
+
+logging.level: ${LOG_LEVEL:warning}
+logging.metrics.enabled: ${METRICS_ENABLED:false}
+
+path.data: /filebeat/data
+
